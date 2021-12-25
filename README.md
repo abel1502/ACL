@@ -1,6 +1,6 @@
 # Abel Common Library
 
-![C++17 compatible](https://img.shields.io/badge/C%2B%2B-17-brightgreen)
+![C++17 compatible](https://img.shields.io/badge/C%2B%2B-20-brightgreen)
 
 The standard library for all of my projects. Might as well be the one for yours', if you so choose.
 

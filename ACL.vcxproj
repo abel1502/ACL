@@ -39,6 +39,7 @@
     <ClInclude Include="include\ACL\math\matrix.h" />
     <ClInclude Include="include\ACL\math\vector.h" />
     <ClInclude Include="include\ACL\math\vector.tpl.h" />
+    <ClInclude Include="include\ACL\named_arg.h" />
     <ClInclude Include="include\ACL\signal.h" />
     <ClInclude Include="include\ACL\signal.tpl.h" />
     <ClInclude Include="include\ACL\template_trinkets.h" />

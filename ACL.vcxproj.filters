@@ -89,6 +89,9 @@
     <ClInclude Include="include\ACL\cmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ACL\named_arg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

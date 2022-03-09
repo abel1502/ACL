@@ -1,26 +1,20 @@
 #ifndef ACL_LOG_H
 #define ACL_LOG_H
 
-#if 0  // TODO: finish
 #include <ACL/general.h>
-#include <cstdio>
-#include <cstdint>
+#include <sstream>
+#include <source_location>
+#include <string_view>
+#include <format>
 
 
+// TODO: Lots of finishing, source_locations everywhere, etc...
 namespace abel {
 
 
 class Logger {
 public:
     DECLARE_ERROR(error, abel::error)
-
-    static Logger instance;
-
-    using tag_t = uint64_t;
-
-    /// Specialize this to define a tag
-    template <tag_t TAG>
-    static constexpr bool tagExists = false;
 
     enum Level {
         L_CRITICAL  = -1,
@@ -30,75 +24,124 @@ public:
         L_DBG       =  3,
     };
 
-    struct Params {
-        /// Is compared to the verbosity to determine
-        /// whether the message should be logged at all
-        /// (level <= verbosity)
-        int level = L_INFO;
 
-        /// Determines the message category [TAG]s, as well as
-        /// allowing to mask parts of the program's debug output.
-        /// It should contain several or'ed tags.
-        /// If it has any tags from the whitelist, and none from the blacklist,
-        /// the message will be displayed
-        tag_t tags = 0;
+    constexpr Logger &global() {
+        return instance;
+    }
 
-        /// Source file name
-        const char *source = nullptr;
+    #pragma region Log wrappers
+    template <typename ... As>
+    inline void log(Level level, const std::string_view &fmt_str, As &&... args,
+                    const std::source_location &srcLoc = std::source_location::current()) const {
+        return instance.log_(level, fmt_str,
+                             std::make_format_args(std::forward<As>(args)...), srcLoc);
+    }
 
-        /// Name of the function that has requested the logging,
-        /// or nullptr if it shouldn't be displayed
-        const char *func = nullptr;
+    template <typename ... As>
+    inline void critical(const char *fmt_str, As &&... args) {
+        return log(L_CRITICAL, fmt_str, std::forward<As>(args)...);
+    }
 
-        /// Same as above, but in a more expanded form.
-        /// One of these is chosen depending on availability and logger configuration
-        const char *prettyFunc = nullptr;
+    template <typename ... As>
+    inline void err(const char *fmt_str, As &&... args) {
+        return log(L_ERR, fmt_str, std::forward<As>(args)...);
+    }
 
-        /// Line number, if available
-        unsigned lineno = nullptr;
+    template <typename ... As>
+    inline void warn(const char *fmt_str, As &&... args) {
+        return log(L_WARN, fmt_str, std::forward<As>(args)...);
+    }
 
-        /// A quick flag to mark a log entry to be specially outlines
-        bool specialAttention = false;
+    template <typename ... As>
+    inline void info(const char *fmt_str, As &&... args) {
+        return log(L_INFO, fmt_str, std::forward<As>(args)...);
+    }
 
-    };
+    template <typename ... As>
+    inline void dbg(const char *fmt_str, As &&... args) {
+        return log(L_DBG, fmt_str, std::forward<As>(args)...);
+    }
+    #pragma endregion Log wrappers
 
+    #pragma region Static log wrappers
+    template <typename ... As>
+    static inline void glog(Level level, const std::string_view &fmt_str, As &&... args,
+                           const std::source_location &srcLoc = std::source_location::current()) {
+        return instance.log<As...>(level, fmt_str, std::forward<As>(args), srcLoc);
+    }
 
-    // TODO: Think of some arguments
-    void init(...);
+    template <typename ... As>
+    static inline void gcritical(const char *fmt_str, As &&... args) {
+        return instance.critical(fmt_str, std::forward<As>(args)...);
+    }
 
-    void registerTag(tag_t tag, const char *name, bool enabled = true);
+    template <typename ... As>
+    static inline void gerr(const char *fmt_str, As &&... args) {
+        return instance.err(fmt_str, std::forward<As>(args)...);
+    }
 
-    tag_t registerTag(const char *name, bool enabled = true);
+    template <typename ... As>
+    static inline void gwarn(const char *fmt_str, As &&... args) {
+        return instance.warn(fmt_str, std::forward<As>(args)...);
+    }
 
-    // Unregistering tags is not an option - just compile without
-    // registering them if you no longer need it
-    // void unregisterTag(tag_t tag);
+    template <typename ... As>
+    static inline void ginfo(const char *fmt_str, As &&... args) {
+        return instance.info(fmt_str, std::forward<As>(args)...);
+    }
 
-    void switchTag(tag_t tag, bool enabled);
-    inline void  enableTag(tag_t tag) { switchTag(tag, true ); }
-    inline void disableTag(tag_t tag) { switchTag(tag, false); }
+    template <typename ... As>
+    static inline void gdbg(const char *fmt_str, As &&... args) {
+        return instance.dbg(fmt_str, std::forward<As>(args)...);
+    }
+    #pragma endregion Static log wrappers
 
-    void log(const char *msg);
+    #pragma region Configuration
+    /// A message is displayed if and only if its level is <= verbosity
+    Level verbosity = L_ERR;
+    /// Messages are formatted twice: first by the user's per-call fmt string, and
+    /// then by this special fmt string, which is required to use indexed formatting
+    /// specifiers. Here's the available indices:
+    ///  - 0 - The message itself
+    ///  - 1 - The verbocity level flare ("DBG", "ERR", etc.)
+    ///  - 2 - Current time (uses format args)
+    ///  - 3 - Current source location (uses format args)
+    ///  - Nothing more yet, to be continued...
+    std::string_view message_fmt = "[{2:}] [{1}] [{3:}]: {0}\n";
+    #pragma endregion Configuration
 
-    /*template <typename ... Ts>
-    void log(const char *fmt, Ts ... args);*/
+    #pragma region Ctors & dtors
+    Logger() noexcept = default;
+    Logger(const Logger &other) noexcept = default;
+    Logger &operator=(const Logger &other) noexcept = default;
+    Logger(Logger &&other) noexcept = default;
+    Logger &operator=(Logger &&other) noexcept = default;
+    ~Logger() noexcept = default;
+    #pragma endregion Ctors & dtors
 
 protected:
-    static const char *tagNames
+    static Logger instance;
 
 
-    FILE *ofile;
-    bool fileOwned;
-    int verbosity;
-    tag_t curMask;  // The categories that are debugged. If curMask & params.tags is non-zero, the message is displayed
+    void log_(Level level, const std::string_view &fmt_str,
+              std::format_args args, const std::source_location &srcLoc) const {
+        if (level > verbosity) {
+            return;
+        }
 
+        std::string msg = std::vformat(fmt_str, std::move(args));
+        std::string result = std::format(message_fmt, msg /*, TODO: Expand */);
+
+        write_(result);
+    }
+
+    void write_(const std::string_view &data) const {
+        //
+    }
 
 };
 
 
 }
-
-#endif
-
 
 #endif // ACL_LOG_H

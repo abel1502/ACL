@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+#include <cstdarg>
 
 
 #define MACROFUNC(...)  do {__VA_ARGS__} while (0)
@@ -95,6 +96,7 @@ extern int verbosity;
 void dbg_(bool isError, int level, const char *funcName, int lineNo, const char *msg, ...);
 
 
+#pragma region rand
 extern unsigned long long randSeed;
 
 inline void srand(unsigned long long seed) {
@@ -117,8 +119,9 @@ inline double randDouble(double min, double max) {
 
     return randDouble(max - min) + min;
 }
+#pragma endregion rand
 
-
+#pragma region doubles
 // #pragma GCC diagnostic push
 // #pragma GCC diagnostic ignored "-Wfloat-equal"
 
@@ -140,7 +143,20 @@ constexpr int cmpDbl(double a, double b) {
 }
 
 // #pragma GCC diagnostic pop
+#pragma endregion doubles
 
+#pragma region sprintfxx
+std::string vsprintfxx(const char *fmt, va_list args);
+
+inline std::string sprintfxx(const char *fmt, ...) {
+    va_list args{};
+    va_start(args, fmt);
+    std::string result = vsprintfxx(fmt, args);
+    va_end(args);
+
+    return result;
+}
+#pragma endregion sprintfxx
 
 }
 

@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <utility>
 #include <cassert>
+#include <cstddef>
 
 // These includes are 'implementation-defined', and may get removed in the future.
 // If you need them, include them manually in your code
@@ -17,7 +18,7 @@
 #include <typeinfo>
 
 
-#define MACROFUNC(...) do {__VA_ARGS__} while (0)
+#define MACROFUNC(...)  do {__VA_ARGS__} while (0)
 #define MACROCOMMA  ,
 #define MACROEMPTY
 #define MACROARGS(...)  __VA_ARGS__
@@ -77,6 +78,9 @@
         ERR("Uncaught unknown...?");                                        \
         return (EXC_RETVAL);                                                \
     }
+
+
+#define implicit explicit(false)
 
 
 namespace abel {

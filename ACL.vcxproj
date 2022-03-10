@@ -20,12 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\debug.cpp" />
+    <ClCompile Include="src\format.cpp" />
     <ClCompile Include="src\general.cpp" />
     <ClCompile Include="src\log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ACL\cmp.h" />
     <ClInclude Include="include\ACL\debug.h" />
+    <ClInclude Include="include\ACL\format.dsl.h" />
+    <ClInclude Include="include\ACL\format.h" />
     <ClInclude Include="include\ACL\general.h" />
     <ClInclude Include="include\ACL\gui\color.h" />
     <ClInclude Include="include\ACL\gui\coords.h" />

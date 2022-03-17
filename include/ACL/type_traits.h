@@ -49,6 +49,23 @@ using arg_type_t = typename arg_type<T>::type;
 #pragma endregion arg_type
 
 
+#pragma region universal_reference
+template <typename B, typename T>
+concept universal_ref =
+    std::is_same_v<std::remove_reference_t<B>, T>;
+
+/**
+ * Usage:
+ *  void f(universal_ref<MyType> auto &&arg) {
+ *      volatile MyType a = std::forward<decltype(arg)>(arg);
+ *  }
+ *
+ * Essentially, this concept allows to accept a universal reference
+ * to your type in a clear and easy fashion, with comprehensible diagnostics
+ */
+#pragma endregion universal_reference
+
+
 }
 
 

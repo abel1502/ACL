@@ -52,17 +52,23 @@ using arg_type_t = typename arg_type<T>::type;
 #pragma region universal_reference
 template <typename B, typename T>
 concept universal_ref =
-    std::is_same_v<std::remove_reference_t<B>, T>;
+    std::is_convertible_v<std::remove_reference_t<B>, T>;
 
 /**
  * Usage:
  *  void f(universal_ref<MyType> auto &&arg) {
- *      volatile MyType a = std::forward<decltype(arg)>(arg);
+ *      volatile MyType a = static_cast<decltype(arg)>(arg);
+ *      volatile MyType b = FWD(arg);
  *  }
  *
  * Essentially, this concept allows to accept a universal reference
  * to your type in a clear and easy fashion, with comprehensible diagnostics
  */
+
+#ifdef FWD
+#error "Macro name collision"
+#endif
+#define FWD(NAME)  static_cast<decltype(NAME)>(NAME)
 #pragma endregion universal_reference
 
 

@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ACL\cmp.h" />
+    <ClInclude Include="include\ACL\container_traits.h" />
     <ClInclude Include="include\ACL\debug.h" />
     <ClInclude Include="include\ACL\format.dsl.h" />
     <ClInclude Include="include\ACL\format.h" />
